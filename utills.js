@@ -4,17 +4,9 @@ export const commands = [
 ];
 
 export const salute = (ctx) => {
-  return ctx.reply("Welcome to Github browser bot!\n what do you wanna do?", {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          { text: "search repo", callback_data: "repo" },
-          { text: "search user", callback_data: "user" },
-        ],
-      ],
-      remove_keyboard: true,
-    },
-  });
+  return ctx.reply(
+    "Welcome to Github browser bot!\n you can send me a github repo link. \n you can also type @github_browser_bot to search for users and download their repo "
+  );
 };
 
 export const initialState = () => {

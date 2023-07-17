@@ -16,6 +16,8 @@ import {
 
 // Load env variables
 dotenv.config();
+
+const GITHUB_URL = "https://github.com";
 // connect to the bot
 const bot = new Bot(process.env.BOT_TOKEN);
 // Connect Github
@@ -28,7 +30,6 @@ bot.api.setMyCommands(commands);
 bot.use(session({ initial: initialState }));
 
 bot.command("start", async (ctx) => {
-  console.log(ctx.session);
   salute(ctx);
 });
 
@@ -61,6 +62,39 @@ bot.on("inline_query", async (ctx) => {
     results, // answer with result list
     { cache_time: 30 * 24 * 3600 } // 30 days in seconds
   );
+});
+
+bot.on("message:entities:url", async (ctx) => {
+  const input = ctx.message.text;
+  const URLcheck = new URL(input);
+  const paths = URLcheck.pathname.toString().split("/");
+  let username = paths[1];
+  let repo = paths[2];
+  if (URLcheck.origin !== GITHUB_URL) {
+    ctx.reply("hmm..Seems like You sent a non-github URL 🤔");
+  } else {
+    try {
+      const result = await fetchRepo(username, repo, octokit);
+      try {
+        const fileBuffer = Buffer.from(result);
+        ctx.api
+          .sendDocument(
+            ctx.chat.id,
+            new InputFile(fileBuffer, `${username}-${repo}.zip`),
+            {
+              thumbnail: new InputFile("./winrar.jpg"),
+              caption: "File Arrived",
+            }
+          )
+          .then((res) => res)
+          .catch((err) => ctx.reply(err.message));
+      } catch (error) {
+        ctx.reply(error.message);
+      }
+    } catch (error) {
+      ctx.reply(error.message);
+    }
+  }
 });
 
 // listen to mentions or messages that start with @
@@ -102,10 +136,6 @@ bot.on("callback_query", async (ctx) => {
       ctx.reply("Can't fetch the repo. Please try again ...");
     }
   }
-});
-
-bot.on("message", (ctx) => {
-  ctx.reply("repopeorpeop");
 });
 
 bot.start();
