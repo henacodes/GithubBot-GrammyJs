@@ -17,9 +17,8 @@ export const salute = (ctx) => {
   });
 };
 
-export const initialState = {
-  user: false,
-  repo: true,
+export const initialState = () => {
+  return { currentUser: "" };
 };
 
 export const fetchRepo = async (username, repo, octokit) => {
@@ -46,7 +45,7 @@ export const searchUsers = async (octokit, query) => {
   return response.data.items;
 };
 
-export const showUser = (
+export const showUser = async (
   ctx,
   name,
   username,
@@ -55,7 +54,7 @@ export const showUser = (
   followers,
   following
 ) => {
-  ctx.telegram.sendPhoto(ctx.chat.id, img, {
+  await ctx.api.sendPhoto(ctx.chat.id, img, {
     caption: `${
       name + ` (@${username} ) `
     }\n${bio}\n${followers} followers\n${following} following
@@ -66,26 +65,26 @@ export const showUser = (
         [
           {
             text: "Repos",
-            callback_data: `repos ${username} `,
+            callback_data: `repos`,
           },
         ],
       ],
+      remove_keyboard: true,
     },
   });
 };
 
 export const sendRepos = (ctx, repos, username) => {
-  ctx.telegram.sendMessage(
-    ctx.chat.id,
-    `Here the last 10 repos of @${username}`,
-    {
-      reply_markup: {
-        inline_keyboard: [
-          ...repos.map((repo) => [
-            { text: repo.name, callback_data: `repo ${username} ${repo.name}` },
-          ]),
-        ],
-      },
-    }
-  );
+  ctx.api.sendMessage(ctx.chat.id, `Here the last 10 repos of @${username}`, {
+    reply_markup: {
+      inline_keyboard: [
+        ...repos.map((repo) => [
+          {
+            text: repo.name,
+            callback_data: `repo ${username} ${repo.name}`,
+          },
+        ]),
+      ],
+    },
+  });
 };
