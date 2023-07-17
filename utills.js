@@ -33,7 +33,6 @@ export const searchUsers = async (octokit, query) => {
   const response = await octokit.rest.search.users({
     q: query,
   });
-
   return response.data.items;
 };
 

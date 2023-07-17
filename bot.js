@@ -51,6 +51,7 @@ bot.callbackQuery("repos", async (ctx) => {
 bot.on("inline_query", async (ctx) => {
   const query = ctx.inlineQuery.query;
   const users = await searchUsers(octokit, query);
+  console.log(users);
   const results = users.map((user) => {
     return InlineQueryResultBuilder.article(user.id, user.login, {
       thumbnail_url: user.avatar_url,
