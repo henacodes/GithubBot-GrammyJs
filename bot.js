@@ -67,7 +67,6 @@ bot.callbackQuery("repos", async (ctx) => {
 
 // search users
 bot.on("inline_query", async (ctx) => {
-  ctx.deleteMessage();
   const query = ctx.inlineQuery.query;
   try {
     const users = await searchUsers(octokit, query);
