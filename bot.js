@@ -67,6 +67,7 @@ bot.callbackQuery("repos", async (ctx) => {
 
 // search users
 bot.on("inline_query", async (ctx) => {
+  ctx.deleteMessage();
   const query = ctx.inlineQuery.query;
   try {
     const users = await searchUsers(octokit, query);
@@ -137,6 +138,7 @@ bot.on("message:entities:mention", async (ctx) => {
 });
 
 bot.on("callback_query", async (ctx) => {
+  ctx.deleteMessage();
   const query = ctx.callbackQuery;
   const [type, username, repoName] = query.data.split(" ");
   if (type === "repo") {

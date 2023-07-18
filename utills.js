@@ -69,6 +69,7 @@ export const showUser = async (
 export const sendRepos = (ctx, repos, username) => {
   ctx.api.sendMessage(ctx.chat.id, `Here the last 10 repos of @${username}`, {
     reply_markup: {
+      remove_keyboard: true,
       inline_keyboard: [
         ...repos.map((repo) => [
           {
