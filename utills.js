@@ -30,8 +30,9 @@ export const fetchRepo = async (username, repo, octokit) => {
 };
 
 export const searchUsers = async (octokit, query) => {
+  const DEFAULT_QUERY = "default search query";
   const response = await octokit.rest.search.users({
-    q: query,
+    q: query || DEFAULT_QUERY,
   });
   return response.data.items;
 };

@@ -1,4 +1,11 @@
-import { Bot, session, InlineQueryResultBuilder, InputFile } from "grammy";
+import {
+  Bot,
+  session,
+  InlineQueryResultBuilder,
+  InputFile,
+  GrammyError,
+  HttpError,
+} from "grammy";
 import dotenv from "dotenv";
 import { Octokit } from "octokit";
 import axios from "axios";
@@ -28,7 +35,18 @@ const octokit = new Octokit({
 bot.api.setMyCommands(commands);
 
 bot.use(session({ initial: initialState }));
-
+/* bot.catch((err) => {
+  const ctx = err.ctx;
+  ctx.reply(`Error while handling update ${ctx.update.update_id}:`);
+  const e = err.error;
+  if (e instanceof GrammyError) {
+    ctx.reply("Error in request:", e.description);
+  } else if (e instanceof HttpError) {
+    ctx.reply("Could not contact Telegram:", e);
+  } else {
+    ctx.reply("Unknown error:", e);
+  }
+}); */
 bot.command("start", async (ctx) => {
   salute(ctx);
 });
@@ -50,19 +68,26 @@ bot.callbackQuery("repos", async (ctx) => {
 // search users
 bot.on("inline_query", async (ctx) => {
   const query = ctx.inlineQuery.query;
-  const users = await searchUsers(octokit, query);
-  console.log(users);
-  const results = users.map((user) => {
-    return InlineQueryResultBuilder.article(user.id, user.login, {
-      thumbnail_url: user.avatar_url,
-    }).text(`@${user.login}`);
-  });
+  try {
+    const users = await searchUsers(octokit, query);
+    const results = users.map((user) => {
+      return InlineQueryResultBuilder.article(user.id, user.login, {
+        thumbnail_url: user.avatar_url,
+      }).text(`@${user.login}`);
+    });
 
-  // Answer the inline query.
-  await ctx.answerInlineQuery(
-    results, // answer with result list
-    { cache_time: 30 * 24 * 3600 } // 30 days in seconds
-  );
+    try {
+      // Answer the inline query.
+      await ctx.answerInlineQuery(
+        results, // answer with result list
+        { cache_time: 30 * 24 * 3600 } // 30 days in seconds
+      );
+    } catch (error) {
+      console.log(error.message);
+    }
+  } catch (error) {
+    console.log(error.message + "valida");
+  }
 });
 
 bot.on("message:entities:url", async (ctx) => {
