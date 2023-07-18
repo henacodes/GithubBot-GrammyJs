@@ -138,3 +138,5 @@ bot.on("callback_query", async (ctx) => {
     }
   }
 });
+
+bot.start();
